@@ -32,10 +32,12 @@ jobs:
     
     - name: Install dependencies
       run: |
+        cd EventScraper
         pip install -r requirements.txt
     
     - name: Run scraper
       run: |
+        cd EventScraper
         python run_scraper.py
     
     - name: Upload to S3
@@ -46,6 +48,9 @@ jobs:
       run: |
         # Install AWS CLI
         pip install awscli
+        
+        # Change to EventScraper directory
+        cd EventScraper
         
         # Find the generated Excel file
         EXCEL_FILE=$(ls aws_events_*.xlsx | head -1)
@@ -70,5 +75,5 @@ jobs:
       if: always()
       with:
         name: scraped-events
-        path: aws_events_*.xlsx
+        path: EventScraper/aws_events_*.xlsx
         retention-days: 7
