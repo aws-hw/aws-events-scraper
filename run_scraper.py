@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple script to run the scraper and convert output to Excel
+Updated: 2026-01-23 - Verified scraper working correctly
 """
 
 import os
