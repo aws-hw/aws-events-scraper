@@ -70,5 +70,8 @@ jobs:
       if: always()
       with:
         name: scraped-events
-        path: aws_events_*.xlsx
+        path: |
+          aws_events_*.xlsx
+          debug_screenshot_*.png
+          events_output.json
         retention-days: 7

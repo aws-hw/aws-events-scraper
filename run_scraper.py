@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple script to run the scraper and convert output to Excel
-Updated: 2026-01-23 - Verified scraper working correctly
+Updated: 2026-01-23 - Added comprehensive debugging
 """
 
 import os
@@ -24,6 +24,17 @@ def main():
         capture_output=True,
         text=True
     )
+    
+    # Print ALL output for debugging
+    if result.stdout:
+        print("\n=== FULL SPIDER OUTPUT ===")
+        print(result.stdout)
+        print("=== END SPIDER OUTPUT ===\n")
+    
+    if result.stderr:
+        print("\n=== SPIDER ERRORS ===")
+        print(result.stderr)
+        print("=== END ERRORS ===\n")
     
     if result.returncode != 0:
         print("Error running spider:")

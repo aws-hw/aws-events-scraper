@@ -35,11 +35,19 @@ class EventSpider(Spider):
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
-        # Initialize driver with webdriver-manager
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
-        self.logger.info("Chrome driver initialized successfully")
+        try:
+            # Initialize driver with webdriver-manager
+            service = Service(ChromeDriverManager().install())
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+            self.logger.info("Chrome driver initialized successfully")
+            self.logger.info(f"Chrome version: {self.driver.capabilities.get('browserVersion', 'unknown')}")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize Chrome driver: {str(e)}")
+            raise
         
         # Process each URL
         for url in self.start_urls:
@@ -53,8 +61,15 @@ class EventSpider(Spider):
             self.driver.get(response.url)
             self.logger.info("Page loaded with Selenium")
             
+            # Log page title to verify page loaded
+            self.logger.info(f"Page title: {self.driver.title}")
+            
             # Wait for content to load
             time.sleep(5)
+            
+            # Log page source length to verify content
+            page_source = self.driver.page_source
+            self.logger.info(f"Page source length: {len(page_source)} characters")
             
             # Scroll to trigger lazy loading
             for i in range(5):
@@ -92,11 +107,18 @@ class EventSpider(Spider):
                             self.logger.info(f"Found {len(links)} links with selector: {selector}")
                             event_links.extend(links)
                             break
-                    except:
-                        pass
+                    except Exception as e:
+                        self.logger.warning(f"Selector {selector} failed: {str(e)}")
                 
                 if not event_links:
                     self.logger.warning(f"No event links found on {response.url}")
+                    # Save screenshot for debugging
+                    try:
+                        screenshot_path = f"debug_screenshot_{response.url.split('=')[-1]}.png"
+                        self.driver.save_screenshot(screenshot_path)
+                        self.logger.info(f"Saved debug screenshot to {screenshot_path}")
+                    except:
+                        pass
                     return
                 
                 # Extract unique URLs
@@ -191,8 +213,14 @@ class EventSpider(Spider):
         # Only yield if we have event name and it's in the right location
         if event.get('event_name'):
             location = event.get('location', '').lower()
-            if any(keyword.lower() in location for keyword in ['online', 'australia', 'new zealand']):
+            self.logger.info(f"Event: {event.get('event_name')}, Location: {location}")
+            if any(keyword.lower() in location for keyword in ['online', 'australia', 'new zealand', 'malaysia']):
+                self.logger.info(f"✓ Yielding event: {event.get('event_name')}")
                 yield event
+            else:
+                self.logger.info(f"✗ Skipping event (location filter): {event.get('event_name')}")
+        else:
+            self.logger.warning(f"Skipping event with no name: {response.url}")
     
     def closed(self, reason):
         """Clean up Selenium driver when spider closes"""
