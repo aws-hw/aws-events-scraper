@@ -31,16 +31,17 @@ jobs:
         chrome-version: stable
     
     - name: Install dependencies
+      working-directory: EventScraper
       run: |
-        cd EventScraper
         pip install -r requirements.txt
     
     - name: Run scraper
+      working-directory: EventScraper
       run: |
-        cd EventScraper
         python run_scraper.py
     
     - name: Upload to S3
+      working-directory: EventScraper
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -48,9 +49,6 @@ jobs:
       run: |
         # Install AWS CLI
         pip install awscli
-        
-        # Change to EventScraper directory
-        cd EventScraper
         
         # Find the generated Excel file
         EXCEL_FILE=$(ls aws_events_*.xlsx | head -1)
