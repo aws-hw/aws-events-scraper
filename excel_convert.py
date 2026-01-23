@@ -20,8 +20,37 @@ def convert_data_to_excel_bytes(data_list):
         BytesIO object containing the Excel file
     """
     
+    # Filter events: only keep New Zealand, Australia, or Online
+    filtered_data = []
+    for event in data_list:
+        location = event.get('location', '').lower()
+        if any(keyword in location for keyword in ['new zealand', 'australia', 'online']):
+            filtered_data.append(event)
+    
     # Convert list of dicts to pandas DataFrame
-    df = pd.DataFrame(data_list)
+    df = pd.DataFrame(filtered_data)
+    
+    # Sort by date (earliest to latest)
+    # Parse dates for sorting
+    def parse_date_for_sort(date_str):
+        """Parse date string to datetime for sorting"""
+        if not date_str:
+            return datetime.datetime.max  # Put empty dates at end
+        
+        try:
+            # Try different date formats
+            for fmt in ['%A %d%b %B %Y', '%A %dth %B %Y', '%A %dst %B %Y', '%A %dnd %B %Y', '%A %drd %B %Y']:
+                try:
+                    return datetime.datetime.strptime(date_str, fmt)
+                except:
+                    continue
+            return datetime.datetime.max  # If parsing fails, put at end
+        except:
+            return datetime.datetime.max
+    
+    df['_sort_date'] = df['date'].apply(parse_date_for_sort)
+    df = df.sort_values('_sort_date')
+    df = df.drop('_sort_date', axis=1)  # Remove temporary sort column
     
     # Create a new Excel workbook in memory
     wb = Workbook()
@@ -55,7 +84,7 @@ def convert_data_to_excel_bytes(data_list):
                 cell.hyperlink = value
                 cell.font = Font(color="0563C1", underline="single")
             
-            # Handle time column - convert to 24-hour NZ time
+            # Handle time column - convert to 24-hour NZ time with timezone label
             elif original_col == 'time':
                 try:
                     time_str = str(value)
@@ -103,8 +132,12 @@ def convert_data_to_excel_bytes(data_list):
                                 end_dt = datetime.datetime.combine(event_date, end_time_obj, tzinfo=event_tz)
                                 end_nz = end_dt.astimezone(nz_tz)
                                 
-                                # Format as 24-hour time range
-                                cell.value = f"{start_nz.strftime('%H:%M')} - {end_nz.strftime('%H:%M')}"
+                                # Determine if NZDT (daylight saving) or NZST (standard time)
+                                # NZDT is UTC+13, NZST is UTC+12
+                                tz_name = start_nz.strftime('%Z')  # Gets 'NZDT' or 'NZST'
+                                
+                                # Format as 24-hour time with timezone label
+                                cell.value = f"{start_nz.strftime('%H:%M')} - {end_nz.strftime('%H:%M')} {tz_name}"
                             else:
                                 cell.value = value
                         else:
