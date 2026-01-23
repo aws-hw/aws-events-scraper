@@ -32,13 +32,15 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
+        pip install -r EventScraper/requirements.txt
     
     - name: Run scraper
+      working-directory: ./EventScraper
       run: |
         python run_scraper.py
     
     - name: Upload to S3
+      working-directory: ./EventScraper
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -70,5 +72,5 @@ jobs:
       if: always()
       with:
         name: scraped-events
-        path: aws_events_*.xlsx
+        path: EventScraper/aws_events_*.xlsx
         retention-days: 7
