@@ -38,14 +38,33 @@ def convert_data_to_excel_bytes(data_list):
             return datetime.datetime.max  # Put empty dates at end
         
         try:
+            # Remove ordinal suffixes (st, nd, rd, th) for easier parsing
+            date_clean = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str)
+            
             # Try different date formats
-            for fmt in ['%A %d%b %B %Y', '%A %dth %B %Y', '%A %dst %B %Y', '%A %dnd %B %Y', '%A %drd %B %Y']:
+            formats = [
+                '%A %d %B %Y',           # Tuesday 24 February 2026
+                '%A %d %B %Y - %A %d %B %Y',  # Range format
+            ]
+            
+            for fmt in formats:
                 try:
-                    return datetime.datetime.strptime(date_str, fmt)
+                    parsed = datetime.datetime.strptime(date_clean, fmt)
+                    return parsed
                 except:
                     continue
+            
+            # If all formats fail, try to extract just the date parts
+            # Format: "Day DDth Month YYYY" or "Day DDth Month YYYY - Day DDth Month YYYY"
+            match = re.search(r'(\d+)\s+(\w+)\s+(\d{4})', date_str)
+            if match:
+                day, month, year = match.groups()
+                date_str_simple = f"{day} {month} {year}"
+                return datetime.datetime.strptime(date_str_simple, '%d %B %Y')
+            
             return datetime.datetime.max  # If parsing fails, put at end
-        except:
+        except Exception as e:
+            print(f"Error parsing date '{date_str}': {e}")
             return datetime.datetime.max
     
     df['_sort_date'] = df['date'].apply(parse_date_for_sort)
@@ -89,6 +108,25 @@ def convert_data_to_excel_bytes(data_list):
                 try:
                     time_str = str(value)
                     
+                    # Get event date from the 'date' column for accurate timezone conversion
+                    date_str = row.get('date', '')
+                    event_date = datetime.date.today()
+                    
+                    if date_str:
+                        # Remove ordinal suffixes for parsing
+                        date_clean = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str)
+                        # Extract first date if it's a range
+                        match = re.search(r'(\d+)\s+(\w+)\s+(\d{4})', date_clean)
+                        if match:
+                            day, month, year = match.groups()
+                            date_str_simple = f"{day} {month} {year}"
+                            try:
+                                parsed_date = datetime.datetime.strptime(date_str_simple, '%d %B %Y')
+                                event_date = parsed_date.date()
+                            except:
+                                pass
+                    
+                    # Check if time has GMT offset
                     if 'GMT' in time_str:
                         # Extract the GMT offset (e.g., +13)
                         gmt_match = re.search(r'GMT([+-]\d+)', time_str)
@@ -101,20 +139,6 @@ def convert_data_to_excel_bytes(data_list):
                             
                             # Get time part before GMT
                             time_part = time_str.split('GMT')[0].strip()
-                            
-                            # Get event date from the 'date' column
-                            date_str = row.get('date', '')
-                            event_date = datetime.date.today()
-                            
-                            if date_str:
-                                # Try different date formats
-                                for fmt in ['%A %d%b %B %Y', '%A %dth %B %Y', '%A %dst %B %Y', '%A %dnd %B %Y', '%A %drd %B %Y']:
-                                    try:
-                                        parsed_date = datetime.datetime.strptime(date_str, fmt)
-                                        event_date = parsed_date.date()
-                                        break
-                                    except:
-                                        continue
                             
                             # Parse start and end times
                             if ' - ' in time_part:
@@ -132,9 +156,8 @@ def convert_data_to_excel_bytes(data_list):
                                 end_dt = datetime.datetime.combine(event_date, end_time_obj, tzinfo=event_tz)
                                 end_nz = end_dt.astimezone(nz_tz)
                                 
-                                # Determine if NZDT (daylight saving) or NZST (standard time)
-                                # NZDT is UTC+13, NZST is UTC+12
-                                tz_name = start_nz.strftime('%Z')  # Gets 'NZDT' or 'NZST'
+                                # Get timezone name (NZDT or NZST)
+                                tz_name = start_nz.strftime('%Z')
                                 
                                 # Format as 24-hour time with timezone label
                                 cell.value = f"{start_nz.strftime('%H:%M')} - {end_nz.strftime('%H:%M')} {tz_name}"
@@ -142,8 +165,36 @@ def convert_data_to_excel_bytes(data_list):
                                 cell.value = value
                         else:
                             cell.value = value
+                    
+                    # If no GMT offset, assume it's already in UTC and convert to NZ time
+                    elif 'UTC' in time_str:
+                        # Extract time range
+                        time_match = re.search(r'(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})', time_str)
+                        if time_match:
+                            start_time_str = time_match.group(1)
+                            end_time_str = time_match.group(2)
+                            
+                            # Parse as UTC
+                            utc_tz = pytz.UTC
+                            start_time_obj = datetime.datetime.strptime(start_time_str, '%H:%M').time()
+                            start_dt = datetime.datetime.combine(event_date, start_time_obj, tzinfo=utc_tz)
+                            start_nz = start_dt.astimezone(nz_tz)
+                            
+                            end_time_obj = datetime.datetime.strptime(end_time_str, '%H:%M').time()
+                            end_dt = datetime.datetime.combine(event_date, end_time_obj, tzinfo=utc_tz)
+                            end_nz = end_dt.astimezone(nz_tz)
+                            
+                            # Get timezone name (NZDT or NZST)
+                            tz_name = start_nz.strftime('%Z')
+                            
+                            # Format as 24-hour time with timezone label
+                            cell.value = f"{start_nz.strftime('%H:%M')} - {end_nz.strftime('%H:%M')} {tz_name}"
+                        else:
+                            cell.value = value
                     else:
+                        # No timezone info, keep as is
                         cell.value = value
+                        
                 except Exception as e:
                     print(f"Error converting time '{value}': {e}")
                     cell.value = value
