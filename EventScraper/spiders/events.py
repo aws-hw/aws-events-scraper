@@ -40,8 +40,19 @@ class EventSpider(Spider):
         chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
         try:
-            # Initialize driver with webdriver-manager
-            service = Service(ChromeDriverManager().install())
+            # Try to use system Chrome/ChromeDriver first (for GitHub Actions)
+            # GitHub Actions installs Chrome and ChromeDriver is available in PATH
+            import shutil
+            chromedriver_path = shutil.which('chromedriver')
+            
+            if chromedriver_path:
+                self.logger.info(f"Using system ChromeDriver at: {chromedriver_path}")
+                service = Service(chromedriver_path)
+            else:
+                # Fallback to webdriver-manager (for local development)
+                self.logger.info("System ChromeDriver not found, using webdriver-manager")
+                service = Service(ChromeDriverManager().install())
+            
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             self.logger.info("Chrome driver initialized successfully")
             self.logger.info(f"Chrome version: {self.driver.capabilities.get('browserVersion', 'unknown')}")
