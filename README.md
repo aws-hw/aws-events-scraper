@@ -1,4 +1,4 @@
-# AWS Events Scraper ![Uploading image.png…]()
+# AWS Events Scraper :space_invader:
 
 
 A Scrapy spider that scrapes AWS events from aws-experience.com and converts them to Excel format with automatic timezone conversion and filtering.
