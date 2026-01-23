@@ -58,8 +58,8 @@ jobs:
         
         echo "Uploading $EXCEL_FILE to S3..."
         
-        # Upload to S3 as latest_events.xlsx
-        aws s3 cp "$EXCEL_FILE" s3://${{ secrets.S3_BUCKET }}/latest_events.xlsx
+        # Upload to S3 as latest_aws_experience_events_ANZ.xlsx
+        aws s3 cp "$EXCEL_FILE" s3://${{ secrets.S3_BUCKET }}/latest_aws_experience_events_ANZ.xlsx
         
         # Also upload with timestamp to archive folder
         aws s3 cp "$EXCEL_FILE" s3://${{ secrets.S3_BUCKET }}/archive/

@@ -120,7 +120,7 @@ See `GITHUB_ACTIONS_GUIDE.md` for detailed step-by-step instructions.
 
 - **GitHub Actions**: View runs at `https://github.com/YOUR_USERNAME/REPO_NAME/actions`
 - **S3 Bucket**: `s3://aws-experience-events-anz/`
-  - `latest_events.xlsx` - Always current
+  - `latest_aws_experience_events_ANZ.xlsx` - Always current
   - `archive/` - Historical files with timestamps
 - **Artifacts**: Available for 7 days in GitHub Actions
 

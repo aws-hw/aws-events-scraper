@@ -68,7 +68,7 @@ def convert_data_to_excel_bytes(data_list):
             return datetime.datetime.max
     
     df['_sort_date'] = df['date'].apply(parse_date_for_sort)
-    df = df.sort_values('_sort_date')
+    df = df.sort_values('_sort_date').reset_index(drop=True)  # Reset index after sorting
     df = df.drop('_sort_date', axis=1)  # Remove temporary sort column
     
     # Create a new Excel workbook in memory
@@ -92,10 +92,9 @@ def convert_data_to_excel_bytes(data_list):
     nz_tz = pytz.timezone('Pacific/Auckland')
     
     # Write data rows (starting from row 2)
-    for row_idx, row in df.iterrows():
-        for col_idx, original_col in enumerate(df.columns, 1):
-            cell = ws.cell(row=row_idx + 2, column=col_idx)
-            value = row[original_col]
+    for row_idx, row in enumerate(df.itertuples(index=False), start=2):
+        for col_idx, (original_col, value) in enumerate(zip(df.columns, row), start=1):
+            cell = ws.cell(row=row_idx, column=col_idx)
             
             # Handle registration_url column - make it a clickable hyperlink
             if original_col == 'registration_url':
@@ -109,7 +108,8 @@ def convert_data_to_excel_bytes(data_list):
                     time_str = str(value)
                     
                     # Get event date from the 'date' column for accurate timezone conversion
-                    date_str = row.get('date', '')
+                    date_col_idx = list(df.columns).index('date')
+                    date_str = row[date_col_idx]
                     event_date = datetime.date.today()
                     
                     if date_str:

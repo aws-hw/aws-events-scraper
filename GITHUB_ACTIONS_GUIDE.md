@@ -520,7 +520,7 @@ GitHub automatically sends emails for:
 **Option 1: From S3 (Recommended)**
 ```bash
 # Download latest file
-aws s3 cp s3://aws-experience-events-anz/latest_events.xlsx ./
+aws s3 cp s3://aws-experience-events-anz/latest_aws_experience_events_ANZ.xlsx ./
 
 # List all archived files
 aws s3 ls s3://aws-experience-events-anz/archive/
@@ -537,7 +537,7 @@ aws s3 cp s3://aws-experience-events-anz/archive/aws_events_20250123_090000.xlsx
 
 **Option 3: From AWS Console**
 1. Go to: https://s3.console.aws.amazon.com/s3/buckets/aws-experience-events-anz
-2. Click on `latest_events.xlsx`
+2. Click on `latest_aws_experience_events_ANZ.xlsx`
 3. Click **Download**
 
 ### 🔔 Set Up Slack Notifications (Optional)
@@ -650,7 +650,7 @@ Use this checklist to track your progress:
 
 **Download latest data:**
 ```bash
-aws s3 cp s3://aws-experience-events-anz/latest_events.xlsx ./
+aws s3 cp s3://aws-experience-events-anz/latest_aws_experience_events_ANZ.xlsx ./
 ```
 
 **View recent runs:**

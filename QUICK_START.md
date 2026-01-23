@@ -38,7 +38,7 @@ Add these 4 secrets:
 aws s3 ls s3://aws-experience-events-anz/
 ```
 
-You should see `latest_events.xlsx`
+You should see `latest_aws_experience_events_ANZ.xlsx`
 
 ---
 
@@ -51,7 +51,7 @@ You should see `latest_events.xlsx`
 5. **Sorts by date**: Earliest to latest
 6. **Converts to Excel**: Creates timestamped file
 7. **Uploads to S3**: 
-   - `latest_events.xlsx` (always current)
+   - `latest_aws_experience_events_ANZ.xlsx` (always current)
    - `archive/aws_events_TIMESTAMP.xlsx` (historical)
 
 ---

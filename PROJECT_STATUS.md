@@ -99,7 +99,7 @@ python-dateutil==2.8.2  # Date parsing
 
 ```
 s3://aws-experience-events-anz/
-├── latest_events.xlsx              # Always current (overwritten daily)
+├── latest_aws_experience_events_ANZ.xlsx   # Always current (overwritten daily)
 └── archive/
     ├── aws_events_20260123_020823.xlsx
     ├── aws_events_20260123_030145.xlsx
@@ -142,7 +142,7 @@ aws s3 ls s3://aws-experience-events-anz/
 aws s3 ls s3://aws-experience-events-anz/archive/
 
 # Download latest
-aws s3 cp s3://aws-experience-events-anz/latest_events.xlsx ./
+aws s3 cp s3://aws-experience-events-anz/latest_aws_experience_events_ANZ.xlsx ./
 ```
 
 ### Known Issues
