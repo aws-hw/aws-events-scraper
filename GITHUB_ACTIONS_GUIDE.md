@@ -3,8 +3,11 @@
 ## Overview
 
 This guide will help you deploy the AWS Events Scraper using GitHub Actions. The workflow will:
-- Run automatically on a schedule (daily at 9 AM UTC)
+- Run automatically on a schedule (daily at 4 AM NZDT / 3 PM UTC)
 - Scrape events from aws-experience.com (Virtual, AU, NZ locations)
+- Filter to only NZ, Australia, and Online events
+- Convert times to NZ timezone (NZDT/NZST)
+- Sort events by date (earliest to latest)
 - Convert results to Excel format
 - Upload to your S3 bucket: `aws-experience-events-anz`
 
@@ -17,7 +20,7 @@ This guide will help you deploy the AWS Events Scraper using GitHub Actions. The
 Before starting, make sure you have:
 - [ ] A GitHub account
 - [ ] Git installed on your computer
-- [ ] AWS account access (Account ID: 603908928524)
+- [ ] AWS account access
 - [ ] S3 bucket already created: `aws-experience-events-anz`
 
 ---
@@ -276,7 +279,7 @@ The workflow is already configured to run automatically **daily at 9 AM UTC**.
 ### 6.1 Current Schedule
 
 The workflow runs:
-- ⏰ **Daily at 9 AM UTC** (automatically)
+- ⏰ **Daily at 4 AM NZDT (3 PM UTC)** (automatically)
 - 🖱️ **Manual trigger** (via GitHub Actions UI)
 - 🔄 **On push to main** (when you push code changes)
 
@@ -288,7 +291,7 @@ To change when the scraper runs automatically:
 2. Find the `schedule` section:
 ```yaml
 schedule:
-  - cron: '0 9 * * *'  # Daily at 9 AM UTC
+  - cron: '0 15 * * *'  # Daily at 3 PM UTC (4 AM NZDT)
 ```
 
 3. Replace with your preferred schedule:
@@ -323,8 +326,8 @@ schedule:
 ```
 
 **Time Zone Converter:**
-- 9 AM UTC = 5 PM AEDT (Sydney, summer)
-- 9 AM UTC = 4 PM AEST (Sydney, winter)
+- 3 PM UTC = 4 AM NZDT (Auckland, summer)
+- 3 PM UTC = 3 AM NZST (Auckland, winter)
 - Use: https://www.worldtimebuddy.com/
 
 4. Commit the changes to apply the new schedule

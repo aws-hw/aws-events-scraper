@@ -44,10 +44,13 @@ You should see `latest_events.xlsx`
 
 ## What Happens Automatically
 
-1. **Daily at 9 AM UTC**: Workflow runs automatically
+1. **Daily at 4 AM NZDT (3 PM UTC)**: Workflow runs automatically
 2. **Scrapes events**: From virtual, AU, and NZ locations
-3. **Converts to Excel**: Creates timestamped file
-4. **Uploads to S3**: 
+3. **Filters events**: Only NZ, Australia, and Online events
+4. **Converts times**: To NZ timezone (NZDT/NZST)
+5. **Sorts by date**: Earliest to latest
+6. **Converts to Excel**: Creates timestamped file
+7. **Uploads to S3**: 
    - `latest_events.xlsx` (always current)
    - `archive/aws_events_TIMESTAMP.xlsx` (historical)
 
