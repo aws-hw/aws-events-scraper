@@ -1,4 +1,5 @@
-# AWS Events Scraper
+# AWS Events Scraper ![Uploading image.png…]()
+
 
 A Scrapy spider that scrapes AWS events from aws-experience.com and converts them to Excel format with automatic timezone conversion and filtering.
 
@@ -7,7 +8,6 @@ A Scrapy spider that scrapes AWS events from aws-experience.com and converts the
 - **Automated Scraping**: Runs daily via GitHub Actions
 - **Multi-Location Support**: Scrapes Virtual, Australia, and New Zealand events
 - **Timezone Conversion**: Automatically converts times to NZ timezone (NZDT/NZST)
-- **Date Sorting**: Events sorted chronologically (earliest to latest)
 - **Excel Output**: Clean, formatted Excel files with clickable registration links
 - **S3 Integration**: Automatic upload to AWS S3 bucket
 - **Selenium + Scrapy**: Handles JavaScript-heavy pages with lazy loading
@@ -16,7 +16,6 @@ A Scrapy spider that scrapes AWS events from aws-experience.com and converts the
 
 The Excel file includes:
 - **Event Name**: Full event title
-- **Date**: Event date (sorted earliest to latest)
 - **Time**: NZ timezone with NZDT/NZST label (e.g., "12:00 - 16:00 NZDT")
 - **Location**: Filtered to show only NZ, Australia, or Online events
 - **Event Link**: Clickable "Register Here" hyperlinks
@@ -48,8 +47,7 @@ This will:
 2. Scrape events from all 3 locations
 3. Filter to NZ, Australia, and Online events only
 4. Convert times to NZ timezone (NZDT/NZST)
-5. Sort by date (earliest first)
-6. Save as `aws_events_YYYYMMDD_HHMMSS.xlsx`
+5. Save as `aws_events_YYYYMMDD_HHMMSS.xlsx`
 
 ### Manual Scrapy Command
 
@@ -107,7 +105,6 @@ See `GITHUB_ACTIONS_GUIDE.md` for detailed step-by-step instructions.
 - S3 upload working
 - Excel formatting complete with:
   - Location filtering (NZ, Australia, Online only)
-  - Date sorting (earliest to latest)
   - Timezone conversion (NZDT/NZST labels)
   - Clickable registration hyperlinks
 
