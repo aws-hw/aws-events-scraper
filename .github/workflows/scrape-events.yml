@@ -1,0 +1,74 @@
+name: Scrape AWS Events
+
+on:
+  # Run on schedule (daily at 9 AM UTC)
+  schedule:
+    - cron: '0 9 * * *'
+  
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+  
+  # Run on push to main (for testing)
+  push:
+    branches: [ main ]
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: stable
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run scraper
+      run: |
+        python run_scraper.py
+    
+    - name: Upload to S3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+      run: |
+        # Install AWS CLI
+        pip install awscli
+        
+        # Find the generated Excel file
+        EXCEL_FILE=$(ls aws_events_*.xlsx | head -1)
+        
+        if [ -z "$EXCEL_FILE" ]; then
+          echo "Error: No Excel file found"
+          exit 1
+        fi
+        
+        echo "Uploading $EXCEL_FILE to S3..."
+        
+        # Upload to S3 as latest_events.xlsx
+        aws s3 cp "$EXCEL_FILE" s3://${{ secrets.S3_BUCKET }}/latest_events.xlsx
+        
+        # Also upload with timestamp to archive folder
+        aws s3 cp "$EXCEL_FILE" s3://${{ secrets.S3_BUCKET }}/archive/
+        
+        echo "Upload complete!"
+    
+    - name: Upload artifact (for debugging)
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: scraped-events
+        path: aws_events_*.xlsx
+        retention-days: 7
