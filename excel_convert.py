@@ -71,6 +71,11 @@ def convert_data_to_excel_bytes(data_list):
     df = df.sort_values('_sort_date').reset_index(drop=True)  # Reset index after sorting
     df = df.drop('_sort_date', axis=1)  # Remove temporary sort column
     
+    # Remove duplicate events based on event_name, location, date, and time
+    # Keep the first occurrence of each unique event
+    df = df.drop_duplicates(subset=['event_name', 'location', 'date', 'time'], keep='first')
+    df = df.reset_index(drop=True)  # Reset index after deduplication
+    
     # Create a new Excel workbook in memory
     wb = Workbook()
     ws = wb.active
