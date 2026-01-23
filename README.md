@@ -5,7 +5,7 @@ A Scrapy spider that scrapes AWS events from aws-experience.com and converts the
 
 ## Features
 
-- **Automated Scraping**: Runs daily via GitHub Actions
+- **Automated Scraping**: Runs daily via GitHub Actions at 4 AM NZDT
 - **Multi-Location Support**: Scrapes Virtual, Australia, and New Zealand events
 - **Timezone Conversion**: Automatically converts times to NZ timezone (NZDT/NZST)
 - **Excel Output**: Clean, formatted Excel files with clickable registration links
@@ -34,9 +34,16 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Local Testing
+### Automated Daily Runs (GitHub Actions)
 
-Run the scraper locally:
+The scraper runs automatically via GitHub Actions:
+- **Schedule**: Daily at 4 AM NZDT (3 PM UTC)
+- **Output**: Uploads to S3 bucket
+- **Access**: Download from S3 when needed
+
+### Local Manual Testing
+
+Run the scraper manually anytime:
 
 ```bash
 python run_scraper.py
@@ -123,6 +130,18 @@ See `GITHUB_ACTIONS_GUIDE.md` for detailed step-by-step instructions.
   - `latest_aws_experience_events_ANZ.xlsx` - Always current
   - `archive/` - Historical files with timestamps
 - **Artifacts**: Available for 7 days in GitHub Actions
+
+## Accessing the File
+
+### Option 1: AWS Console
+1. Go to https://s3.console.aws.amazon.com/
+2. Navigate to `aws-experience-events-anz` bucket
+3. Download `latest_aws_experience_events_ANZ.xlsx`
+
+### Option 2: AWS CLI
+```bash
+aws s3 cp s3://aws-experience-events-anz/latest_aws_experience_events_ANZ.xlsx ~/Downloads/
+```
 
 ## Cost
 
