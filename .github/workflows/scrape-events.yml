@@ -1,7 +1,7 @@
 name: Scrape AWS Events
 
 on:
-  # # Run on schedule (daily at 4 AM NZDT / 3 PM UTC)
+  # Run on schedule (daily at 4 AM NZDT / 3 PM UTC)
   schedule:
     - cron: '0 15 * * *'
   
