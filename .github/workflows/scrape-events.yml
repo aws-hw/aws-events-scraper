@@ -25,19 +25,33 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install Chrome and ChromeDriver
+    - name: Install Chrome
       uses: browser-actions/setup-chrome@latest
       with:
         chrome-version: stable
-        install-chromedriver: true
     
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
     
-    - name: Run scraper
+    - name: Run scraper (with retry)
       run: |
-        python run_scraper.py
+        # Try up to 3 times with 5 minute delay between attempts
+        for i in 1 2 3; do
+          echo "Attempt $i of 3..."
+          if python run_scraper.py; then
+            echo "✓ Scraper succeeded on attempt $i"
+            exit 0
+          else
+            echo "✗ Scraper failed on attempt $i"
+            if [ $i -lt 3 ]; then
+              echo "Waiting 5 minutes before retry..."
+              sleep 300
+            fi
+          fi
+        done
+        echo "✗ All 3 attempts failed"
+        exit 1
     
     - name: Upload to S3
       env:

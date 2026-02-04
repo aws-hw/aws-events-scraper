@@ -40,25 +40,29 @@ class EventSpider(Spider):
         chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
         try:
-            # Try to use system Chrome/ChromeDriver first (for GitHub Actions)
-            # GitHub Actions installs Chrome and ChromeDriver is available in PATH
-            import shutil
-            chromedriver_path = shutil.which('chromedriver')
-            
-            if chromedriver_path:
-                self.logger.info(f"Using system ChromeDriver at: {chromedriver_path}")
-                service = Service(chromedriver_path)
-            else:
-                # Fallback to webdriver-manager (for local development)
-                self.logger.info("System ChromeDriver not found, using webdriver-manager")
-                service = Service(ChromeDriverManager().install())
-            
+            # Try webdriver-manager first (handles version matching automatically)
+            self.logger.info("Attempting to use webdriver-manager for automatic version matching")
+            service = Service(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
-            self.logger.info("Chrome driver initialized successfully")
+            self.logger.info("Chrome driver initialized successfully with webdriver-manager")
             self.logger.info(f"Chrome version: {self.driver.capabilities.get('browserVersion', 'unknown')}")
         except Exception as e:
-            self.logger.error(f"Failed to initialize Chrome driver: {str(e)}")
-            raise
+            self.logger.warning(f"webdriver-manager failed: {str(e)}, trying system ChromeDriver")
+            try:
+                # Fallback to system ChromeDriver
+                import shutil
+                chromedriver_path = shutil.which('chromedriver')
+                
+                if chromedriver_path:
+                    self.logger.info(f"Using system ChromeDriver at: {chromedriver_path}")
+                    service = Service(chromedriver_path)
+                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                    self.logger.info("Chrome driver initialized successfully with system ChromeDriver")
+                else:
+                    raise Exception("No ChromeDriver found in system PATH")
+            except Exception as e2:
+                self.logger.error(f"Failed to initialize Chrome driver: {str(e2)}")
+                raise
         
         # Process each URL
         for url in self.start_urls:
