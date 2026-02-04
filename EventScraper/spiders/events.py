@@ -225,7 +225,7 @@ class EventSpider(Spider):
         if event.get('event_name'):
             location = event.get('location', '').lower()
             self.logger.info(f"Event: {event.get('event_name')}, Location: {location}")
-            if any(keyword.lower() in location for keyword in ['online', 'australia', 'new zealand', 'malaysia']):
+            if any(keyword.lower() in location for keyword in ['online', 'australia', 'new zealand']):
                 self.logger.info(f"✓ Yielding event: {event.get('event_name')}")
                 yield event
             else:
