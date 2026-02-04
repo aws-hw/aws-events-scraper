@@ -1,14 +1,12 @@
 name: Scrape AWS Events
 
 on:
-  # Run on schedule (daily at 4 AM NZDT / 3 PM UTC)
   schedule:
+    # Run daily at 4 AM NZDT (3 PM UTC)
     - cron: '0 15 * * *'
   
-  # Allow manual trigger from GitHub UI
   workflow_dispatch:
   
-  # Run on push to main (for testing)
   push:
     branches: [ main ]
 
